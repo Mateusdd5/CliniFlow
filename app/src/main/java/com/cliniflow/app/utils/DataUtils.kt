@@ -14,3 +14,8 @@ fun proximosDias(quantidade: Int): List<Pair<String, String>> {
         isoFormat.format(dia.time) to labelFormat.format(dia.time)
     }
 }
+
+fun hoje(): String {
+    val isoFormat = SimpleDateFormat("yyyy-MM-dd", Locale("pt", "BR"))
+    return isoFormat.format(Calendar.getInstance().time)
+}

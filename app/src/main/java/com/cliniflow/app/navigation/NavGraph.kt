@@ -10,7 +10,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.cliniflow.app.model.Usuario
-import com.cliniflow.app.ui.TelaEmConstrucao
+import com.cliniflow.app.ui.admin.AdminHistoricoScreen
+import com.cliniflow.app.ui.admin.AdminHomeScreen
+import com.cliniflow.app.ui.admin.AdminUsuariosScreen
+import com.cliniflow.app.ui.admin.EditarPerfilAdminScreen
 import com.cliniflow.app.ui.auth.CadastroScreen
 import com.cliniflow.app.ui.auth.LoginScreen
 import com.cliniflow.app.ui.medico.EditarAgendaScreen
@@ -36,6 +39,9 @@ object Rotas {
     const val EDITAR_AGENDA = "editar_agenda"
     const val MEDICO_CONSULTAS = "medico_consultas"
     const val EDITAR_PERFIL_MEDICO = "editar_perfil_medico"
+    const val ADMIN_USUARIOS = "admin_usuarios"
+    const val ADMIN_HISTORICO = "admin_historico"
+    const val EDITAR_PERFIL_ADMIN = "editar_perfil_admin"
 }
 
 private fun rotaHomePor(usuario: Usuario): String = when (usuario.tipo) {
@@ -129,6 +135,28 @@ fun CliniFlowNavGraph(navController: NavHostController = rememberNavController()
             )
         }
 
-        composable(Rotas.HOME_ADMIN) { TelaEmConstrucao("Painel Admin") }
+        composable(Rotas.HOME_ADMIN) {
+            AdminHomeScreen(
+                onVerUsuarios = { navController.navigate(Rotas.ADMIN_USUARIOS) },
+                onVerHistorico = { navController.navigate(Rotas.ADMIN_HISTORICO) },
+                onEditarPerfil = { navController.navigate(Rotas.EDITAR_PERFIL_ADMIN) },
+                onLogout = { navController.navigate(Rotas.LOGIN) { popUpTo(0) { inclusive = true } } }
+            )
+        }
+
+        composable(Rotas.ADMIN_USUARIOS) {
+            AdminUsuariosScreen(onVoltar = { navController.popBackStack() })
+        }
+
+        composable(Rotas.ADMIN_HISTORICO) {
+            AdminHistoricoScreen(onVoltar = { navController.popBackStack() })
+        }
+
+        composable(Rotas.EDITAR_PERFIL_ADMIN) {
+            EditarPerfilAdminScreen(
+                onVoltar = { navController.popBackStack() },
+                onLogout = { navController.navigate(Rotas.LOGIN) { popUpTo(0) { inclusive = true } } }
+            )
+        }
     }
 }

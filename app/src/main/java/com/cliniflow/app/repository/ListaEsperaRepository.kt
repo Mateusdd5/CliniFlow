@@ -32,4 +32,9 @@ class ListaEsperaRepository {
     suspend fun listarPorPaciente(pacienteId: String): List<ListaEspera> = try {
         colecao.whereEqualTo("pacienteId", pacienteId).get().await().toObjects(ListaEspera::class.java)
     } catch (e: Exception) { emptyList() }
+
+    suspend fun listarTodas(): List<ListaEspera> = try {
+        colecao.get().await().toObjects(ListaEspera::class.java)
+    } catch (e: Exception) { emptyList() }
 }
+
