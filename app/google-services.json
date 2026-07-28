@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "686391107338",
+    "project_id": "cliniflow-d39ac",
+    "storage_bucket": "cliniflow-d39ac.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:686391107338:android:bc2721ab966b59da2124f3",
+        "android_client_info": {
+          "package_name": "com.cliniflow.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDcn6ccWtHgCXUKHePfq-uaL7b5uSmPNsA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
