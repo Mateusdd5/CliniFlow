@@ -55,4 +55,14 @@ class ConsultaRepository {
         colecao.document(consultaId).update("status", "cancelada").await()
         Result.success(Unit)
     } catch (e: Exception) { Result.failure(e) }
+
+    suspend fun confirmar(consultaId: String): Result<Unit> = try {
+        colecao.document(consultaId).update("status", "confirmada").await()
+        Result.success(Unit)
+    } catch (e: Exception) { Result.failure(e) }
+
+    suspend fun marcarComoRealizada(consultaId: String): Result<Unit> = try {
+        colecao.document(consultaId).update("status", "realizada").await()
+        Result.success(Unit)
+    } catch (e: Exception) { Result.failure(e) }
 }

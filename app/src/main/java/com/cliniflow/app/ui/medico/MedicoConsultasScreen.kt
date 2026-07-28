@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cliniflow.app.model.Consulta
+import com.cliniflow.app.utils.hoje
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,14 +43,19 @@ fun MedicoConsultasScreen(
             }
 
             val lista = if (abaSelecionada == 0) viewModel.consultasAtivas else viewModel.consultasHistorico
-            val mostrarCancelar = abaSelecionada == 0
 
             if (lista.isEmpty()) {
                 Box(Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) { Text("Nenhuma consulta aqui.") }
             } else {
                 LazyColumn(modifier = Modifier.padding(16.dp)) {
                     items(lista) { consulta ->
-                        ConsultaCardMedico(consulta, mostrarCancelar) { viewModel.cancelarConsulta(consulta.id) }
+                        ConsultaCardMedico(
+                            consulta = consulta,
+                            mostrarAcoes = abaSelecionada == 0,
+                            onConfirmar = { viewModel.confirmarConsulta(consulta.id) },
+                            onMarcarRealizada = { viewModel.marcarComoRealizada(consulta.id) },
+                            onCancelar = { viewModel.cancelarConsulta(consulta.id) }
+                        )
                     }
                 }
             }
@@ -58,17 +64,32 @@ fun MedicoConsultasScreen(
 }
 
 @Composable
-private fun ConsultaCardMedico(consulta: Consulta, mostrarCancelar: Boolean, onCancelar: () -> Unit) {
+private fun ConsultaCardMedico(
+    consulta: Consulta,
+    mostrarAcoes: Boolean,
+    onConfirmar: () -> Unit,
+    onMarcarRealizada: () -> Unit,
+    onCancelar: () -> Unit
+) {
     Card(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
-        Row(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-            Column {
-                Text(consulta.pacienteNome, style = MaterialTheme.typography.titleMedium)
-                Text(consulta.especialidade, style = MaterialTheme.typography.bodySmall)
-                Text("${consulta.data} · ${consulta.hora}", style = MaterialTheme.typography.bodySmall)
-                Text(statusLegivelMedico(consulta.status), style = MaterialTheme.typography.labelMedium)
-            }
-            if (mostrarCancelar && (consulta.status == "pendente" || consulta.status == "confirmada")) {
-                TextButton(onClick = onCancelar) { Text("Cancelar") }
+        Column(Modifier.padding(16.dp)) {
+            Text(consulta.pacienteNome, style = MaterialTheme.typography.titleMedium)
+            Text(consulta.especialidade, style = MaterialTheme.typography.bodySmall)
+            Text("${consulta.data} · ${consulta.hora}", style = MaterialTheme.typography.bodySmall)
+            Text(statusLegivelMedico(consulta.status), style = MaterialTheme.typography.labelMedium)
+
+            if (mostrarAcoes && (consulta.status == "pendente" || consulta.status == "confirmada")) {
+                Spacer(Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+                    when (consulta.status) {
+                        "pendente" -> TextButton(onClick = onConfirmar) { Text("Confirmar") }
+                        "confirmada" -> {
+                            val podeRealizar = consulta.data <= hoje()
+                            TextButton(onClick = onMarcarRealizada, enabled = podeRealizar) { Text("Marcar como Realizada") }
+                        }
+                    }
+                    TextButton(onClick = onCancelar) { Text("Cancelar") }
+                }
             }
         }
     }

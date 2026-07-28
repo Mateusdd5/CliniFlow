@@ -32,8 +32,15 @@ class AuthViewModel : ViewModel() {
         viewModelScope.launch {
             authRepository.login(email, senha)
                 .onSuccess { uid ->
-                    usuarioLogado = usuarioRepository.buscarPorId(uid)
-                    if (usuarioLogado == null) erro = "Usuário autenticado, mas dados não encontrados"
+                    val usuario = usuarioRepository.buscarPorId(uid)
+                    when {
+                        usuario == null -> erro = "Usuário autenticado, mas dados não encontrados"
+                        !usuario.ativo -> {
+                            authRepository.logout()
+                            erro = "Sua conta foi desativada. Entre em contato com a administração."
+                        }
+                        else -> usuarioLogado = usuario
+                    }
                 }
                 .onFailure { erro = "E-mail ou senha inválidos" }
             carregando = false

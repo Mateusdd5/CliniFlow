@@ -41,4 +41,18 @@ class MedicoConsultasViewModel : ViewModel() {
             carregar()
         }
     }
+
+    fun confirmarConsulta(consultaId: String) {
+        viewModelScope.launch {
+            consultaRepository.confirmar(consultaId)
+            carregar()
+        }
+    }
+
+    fun marcarComoRealizada(consultaId: String) {
+        viewModelScope.launch {
+            consultaRepository.marcarComoRealizada(consultaId)
+            carregar()
+        }
+    }
 }
