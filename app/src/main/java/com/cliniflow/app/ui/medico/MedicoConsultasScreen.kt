@@ -10,6 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cliniflow.app.model.Consulta
+import com.cliniflow.app.ui.components.Avatar
+import com.cliniflow.app.ui.components.BadgeTipo
+import com.cliniflow.app.ui.components.StatusBadge
 import com.cliniflow.app.utils.hoje
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,10 +76,27 @@ private fun ConsultaCardMedico(
 ) {
     Card(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
         Column(Modifier.padding(16.dp)) {
-            Text(consulta.pacienteNome, style = MaterialTheme.typography.titleMedium)
-            Text(consulta.especialidade, style = MaterialTheme.typography.bodySmall)
-            Text("${consulta.data} · ${consulta.hora}", style = MaterialTheme.typography.bodySmall)
-            Text(statusLegivelMedico(consulta.status), style = MaterialTheme.typography.labelMedium)
+            Row(
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                    Avatar(
+                        nome = consulta.pacienteNome.substringBefore(" "),
+                        sobrenome = consulta.pacienteNome.substringAfter(" ", ""),
+                        tamanho = 44.dp
+                    )
+                    Spacer(Modifier.width(10.dp))
+                    Column {
+                        Text(consulta.pacienteNome, style = MaterialTheme.typography.titleMedium)
+                        Text(consulta.especialidade, style = MaterialTheme.typography.bodySmall)
+                        Text("${consulta.data} · ${consulta.hora}", style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+                val (texto, tipo) = statusInfo(consulta.status)
+                StatusBadge(texto = texto, tipo = tipo)
+            }
 
             if (mostrarAcoes && (consulta.status == "pendente" || consulta.status == "confirmada")) {
                 Spacer(Modifier.height(8.dp))
@@ -95,10 +115,10 @@ private fun ConsultaCardMedico(
     }
 }
 
-private fun statusLegivelMedico(status: String): String = when (status) {
-    "pendente" -> "Pendente"
-    "confirmada" -> "Confirmada"
-    "realizada" -> "Realizada"
-    "cancelada" -> "Cancelada"
-    else -> status
+private fun statusInfo(status: String): Pair<String, BadgeTipo> = when (status) {
+    "pendente" -> "Pendente" to BadgeTipo.ATENCAO
+    "confirmada" -> "Confirmada" to BadgeTipo.SUCESSO
+    "realizada" -> "Realizada" to BadgeTipo.INFO
+    "cancelada" -> "Cancelada" to BadgeTipo.ERRO
+    else -> status to BadgeTipo.NEUTRO
 }

@@ -13,6 +13,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cliniflow.app.model.Consulta
 import com.cliniflow.app.model.ListaEspera
+import com.cliniflow.app.ui.components.BadgeTipo
+import com.cliniflow.app.ui.components.StatusBadge
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,11 +80,18 @@ private fun ConsultasTab(viewModel: AdminHistoricoViewModel) {
 @Composable
 private fun ConsultaCardAdmin(consulta: Consulta) {
     Card(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
-        Column(Modifier.padding(16.dp)) {
-            Text("Paciente: ${consulta.pacienteNome}", style = MaterialTheme.typography.titleSmall)
-            Text("Médico: ${consulta.medicoNome} · ${consulta.especialidade}", style = MaterialTheme.typography.bodySmall)
-            Text("${consulta.data} · ${consulta.hora}", style = MaterialTheme.typography.bodySmall)
-            Text(statusLegivelAdmin(consulta.status), style = MaterialTheme.typography.labelMedium)
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text("Paciente: ${consulta.pacienteNome}", style = MaterialTheme.typography.titleSmall)
+                Text("Médico: ${consulta.medicoNome} · ${consulta.especialidade}", style = MaterialTheme.typography.bodySmall)
+                Text("${consulta.data} · ${consulta.hora}", style = MaterialTheme.typography.bodySmall)
+            }
+            val (texto, tipo) = statusInfo(consulta.status)
+            StatusBadge(texto = texto, tipo = tipo)
         }
     }
 }
@@ -106,10 +115,10 @@ private fun ListaEsperaGeralTab(filas: List<ListaEspera>) {
     }
 }
 
-private fun statusLegivelAdmin(status: String): String = when (status) {
-    "pendente" -> "Pendente"
-    "confirmada" -> "Confirmada"
-    "realizada" -> "Realizada"
-    "cancelada" -> "Cancelada"
-    else -> status
+private fun statusInfo(status: String): Pair<String, BadgeTipo> = when (status) {
+    "pendente" -> "Pendente" to BadgeTipo.ATENCAO
+    "confirmada" -> "Confirmada" to BadgeTipo.SUCESSO
+    "realizada" -> "Realizada" to BadgeTipo.INFO
+    "cancelada" -> "Cancelada" to BadgeTipo.ERRO
+    else -> status to BadgeTipo.NEUTRO
 }

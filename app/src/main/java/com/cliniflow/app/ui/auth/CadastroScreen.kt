@@ -1,13 +1,29 @@
 package com.cliniflow.app.ui.auth
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.HealthAndSafety
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.outlined.Badge
+import androidx.compose.material.icons.outlined.CalendarToday
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.LocalHospital
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cliniflow.app.model.Usuario
@@ -27,6 +43,7 @@ fun CadastroScreen(
     var cpf by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var senha by remember { mutableStateOf("") }
+    var senhaVisivel by remember { mutableStateOf(false) }
     var sexo by remember { mutableStateOf("M") }
     var crm by remember { mutableStateOf("") }
     var especialidade by remember { mutableStateOf(especialidadesDisponiveis.first()) }
@@ -39,31 +56,91 @@ fun CadastroScreen(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Box(
+            modifier = Modifier.size(64.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Filled.HealthAndSafety,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.size(32.dp)
+            )
+        }
+        Spacer(Modifier.height(12.dp))
         Text("Criar Conta", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(16.dp))
 
         Row {
-            FilterChip(selected = tipo == "paciente", onClick = { tipo = "paciente" }, label = { Text("Paciente") })
+            FilterChip(
+                selected = tipo == "paciente",
+                onClick = { tipo = "paciente" },
+                label = { Text("Paciente") },
+                leadingIcon = { Icon(Icons.Outlined.Person, contentDescription = null, modifier = Modifier.size(18.dp)) }
+            )
             Spacer(Modifier.width(8.dp))
-            FilterChip(selected = tipo == "medico", onClick = { tipo = "medico" }, label = { Text("Médico") })
+            FilterChip(
+                selected = tipo == "medico",
+                onClick = { tipo = "medico" },
+                label = { Text("Médico") },
+                leadingIcon = { Icon(Icons.Outlined.LocalHospital, contentDescription = null, modifier = Modifier.size(18.dp)) }
+            )
         }
         Spacer(Modifier.height(16.dp))
 
-        OutlinedTextField(nome, { nome = it }, label = { Text("Nome") }, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(
+            nome, { nome = it }, label = { Text("Nome") },
+            leadingIcon = { Icon(Icons.Outlined.Person, contentDescription = null) },
+            singleLine = true, modifier = Modifier.fillMaxWidth()
+        )
         Spacer(Modifier.height(8.dp))
-        OutlinedTextField(sobrenome, { sobrenome = it }, label = { Text("Sobrenome") }, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(
+            sobrenome, { sobrenome = it }, label = { Text("Sobrenome") },
+            singleLine = true, modifier = Modifier.fillMaxWidth()
+        )
         Spacer(Modifier.height(8.dp))
-        OutlinedTextField(dataNascimento, { dataNascimento = it }, label = { Text("Data de Nascimento") }, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(
+            dataNascimento, { dataNascimento = it }, label = { Text("Data de Nascimento") },
+            leadingIcon = { Icon(Icons.Outlined.CalendarToday, contentDescription = null) },
+            singleLine = true, modifier = Modifier.fillMaxWidth()
+        )
         Spacer(Modifier.height(8.dp))
-        OutlinedTextField(cpf, { cpf = it }, label = { Text("CPF") }, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(
+            cpf, { cpf = it }, label = { Text("CPF") },
+            leadingIcon = { Icon(Icons.Outlined.Badge, contentDescription = null) },
+            singleLine = true, modifier = Modifier.fillMaxWidth()
+        )
         Spacer(Modifier.height(8.dp))
-        OutlinedTextField(email, { email = it }, label = { Text("E-mail") }, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(
+            email, { email = it }, label = { Text("E-mail") },
+            leadingIcon = { Icon(Icons.Outlined.Email, contentDescription = null) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            singleLine = true, modifier = Modifier.fillMaxWidth()
+        )
         Spacer(Modifier.height(8.dp))
-        OutlinedTextField(senha, { senha = it }, label = { Text("Senha") }, visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(
+            senha, { senha = it }, label = { Text("Senha") },
+            leadingIcon = { Icon(Icons.Outlined.Lock, contentDescription = null) },
+            trailingIcon = {
+                IconButton(onClick = { senhaVisivel = !senhaVisivel }) {
+                    Icon(
+                        if (senhaVisivel) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                        contentDescription = if (senhaVisivel) "Ocultar senha" else "Mostrar senha"
+                    )
+                }
+            },
+            visualTransformation = if (senhaVisivel) VisualTransformation.None else PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            singleLine = true, modifier = Modifier.fillMaxWidth()
+        )
 
         if (tipo == "medico") {
             Spacer(Modifier.height(8.dp))
-            OutlinedTextField(crm, { crm = it }, label = { Text("CRM") }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(
+                crm, { crm = it }, label = { Text("CRM") },
+                leadingIcon = { Icon(Icons.Outlined.Badge, contentDescription = null) },
+                singleLine = true, modifier = Modifier.fillMaxWidth()
+            )
 
             Spacer(Modifier.height(12.dp))
             Text("Especialidade", style = MaterialTheme.typography.labelLarge)
@@ -104,10 +181,10 @@ fun CadastroScreen(
                 viewModel.cadastrar(usuario, senha)
             },
             enabled = !viewModel.carregando,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().height(50.dp)
         ) {
             if (viewModel.carregando) CircularProgressIndicator(Modifier.size(20.dp), color = MaterialTheme.colorScheme.onPrimary)
-            else Text("Concluir Cadastro")
+            else Text("Concluir Cadastro", style = MaterialTheme.typography.titleMedium)
         }
 
         Spacer(Modifier.height(16.dp))

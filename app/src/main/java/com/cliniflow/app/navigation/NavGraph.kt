@@ -54,6 +54,7 @@ private fun rotaHomePor(usuario: Usuario): String = when (usuario.tipo) {
 fun CliniFlowNavGraph(navController: NavHostController = rememberNavController()) {
 
     var medicoSelecionado by remember { mutableStateOf<Usuario?>(null) }
+    var especialidadeAtalho by remember { mutableStateOf<String?>(null) }
 
     NavHost(navController = navController, startDestination = Rotas.LOGIN) {
 
@@ -77,7 +78,14 @@ fun CliniFlowNavGraph(navController: NavHostController = rememberNavController()
 
         composable(Rotas.HOME_PACIENTE) {
             PacienteHomeScreen(
-                onNovoAgendamento = { navController.navigate(Rotas.BUSCAR_MEDICOS) },
+                onNovoAgendamento = {
+                    especialidadeAtalho = null
+                    navController.navigate(Rotas.BUSCAR_MEDICOS)
+                },
+                onEspecialidadeSelecionada = { especialidade ->
+                    especialidadeAtalho = especialidade
+                    navController.navigate(Rotas.BUSCAR_MEDICOS)
+                },
                 onMinhasConsultas = { navController.navigate(Rotas.MINHAS_CONSULTAS) },
                 onEditarPerfil = { navController.navigate(Rotas.EDITAR_PERFIL_PACIENTE) },
                 onLogout = { navController.navigate(Rotas.LOGIN) { popUpTo(0) { inclusive = true } } }
@@ -86,6 +94,8 @@ fun CliniFlowNavGraph(navController: NavHostController = rememberNavController()
 
         composable(Rotas.BUSCAR_MEDICOS) {
             BuscarMedicosScreen(
+                especialidadeInicial = especialidadeAtalho,
+                onVoltar = { navController.popBackStack() },
                 onMedicoSelecionado = { medico ->
                     medicoSelecionado = medico
                     navController.navigate(Rotas.SELECIONAR_HORARIO)
@@ -103,10 +113,13 @@ fun CliniFlowNavGraph(navController: NavHostController = rememberNavController()
             }
         }
 
-        composable(Rotas.MINHAS_CONSULTAS) { MinhasConsultasScreen() }
+        composable(Rotas.MINHAS_CONSULTAS) {
+            MinhasConsultasScreen(onVoltar = { navController.popBackStack() })
+        }
 
         composable(Rotas.EDITAR_PERFIL_PACIENTE) {
             EditarPerfilScreen(
+                onVoltar = { navController.popBackStack() },
                 onLogout = { navController.navigate(Rotas.LOGIN) { popUpTo(0) { inclusive = true } } }
             )
         }

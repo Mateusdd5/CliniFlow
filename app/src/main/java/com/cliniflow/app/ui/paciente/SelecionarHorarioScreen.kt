@@ -1,17 +1,24 @@
 package com.cliniflow.app.ui.paciente
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CalendarToday
+import androidx.compose.material.icons.outlined.HourglassEmpty
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cliniflow.app.model.Usuario
+import com.cliniflow.app.ui.components.Avatar
 import com.cliniflow.app.utils.proximosDias
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,11 +46,34 @@ fun SelecionarHorarioScreen(
     ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize().padding(16.dp)) {
 
-            Text("Dr(a). ${medico.nome} ${medico.sobrenome}", style = MaterialTheme.typography.titleLarge)
-            Text(medico.especialidade ?: "", style = MaterialTheme.typography.bodyMedium)
-            Spacer(Modifier.height(16.dp))
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+            ) {
+                Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Avatar(nome = medico.nome, sobrenome = medico.sobrenome, tamanho = 56.dp)
+                    Spacer(Modifier.width(12.dp))
+                    Column {
+                        Text(
+                            "Dr(a). ${medico.nome} ${medico.sobrenome}",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                        Text(
+                            medico.especialidade ?: "",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.height(20.dp))
 
-            Text("Data", style = MaterialTheme.typography.labelLarge)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Outlined.CalendarToday, contentDescription = null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
+                Spacer(Modifier.width(6.dp))
+                Text("Data", style = MaterialTheme.typography.labelLarge)
+            }
             Spacer(Modifier.height(8.dp))
             Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
                 dias.forEach { (iso, label) ->
@@ -58,7 +88,11 @@ fun SelecionarHorarioScreen(
             Spacer(Modifier.height(24.dp))
 
             if (viewModel.dataSelecionada.isNotBlank()) {
-                Text("Horário", style = MaterialTheme.typography.labelLarge)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Outlined.Schedule, contentDescription = null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
+                    Spacer(Modifier.width(6.dp))
+                    Text("Horário", style = MaterialTheme.typography.labelLarge)
+                }
                 Spacer(Modifier.height(8.dp))
 
                 if (viewModel.carregandoHorarios) {
@@ -66,17 +100,21 @@ fun SelecionarHorarioScreen(
                 } else if (viewModel.horariosDisponiveis.isEmpty()) {
                     Text("O médico ainda não abriu horários para esse dia.")
                 } else {
-                    LazyVerticalGrid(columns = GridCells.Fixed(3), modifier = Modifier.height(160.dp)) {
+                    LazyVerticalGrid(columns = GridCells.Fixed(3), modifier = Modifier.height(170.dp)) {
                         items(viewModel.horariosDisponiveis) { hora ->
                             val ocupado = hora in viewModel.horariosOcupados
-                            OutlinedButton(
-                                onClick = {
-                                    if (ocupado) viewModel.selecionarHorarioOcupado(hora)
-                                    else viewModel.agendar(hora)
-                                },
-                                modifier = Modifier.padding(4.dp)
-                            ) {
-                                Text(if (ocupado) "$hora ✕" else hora)
+                            if (ocupado) {
+                                OutlinedButton(
+                                    onClick = { viewModel.selecionarHorarioOcupado(hora) },
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f)),
+                                    modifier = Modifier.padding(4.dp)
+                                ) { Text(hora) }
+                            } else {
+                                Button(
+                                    onClick = { viewModel.agendar(hora) },
+                                    modifier = Modifier.padding(4.dp)
+                                ) { Text(hora) }
                             }
                         }
                     }
@@ -84,9 +122,18 @@ fun SelecionarHorarioScreen(
 
                 viewModel.horarioParaFila?.let { hora ->
                     Spacer(Modifier.height(12.dp))
-                    Card {
+                    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
                         Column(Modifier.padding(12.dp)) {
-                            Text("O horário $hora já está ocupado.")
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    Icons.Outlined.HourglassEmpty,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp),
+                                    tint = MaterialTheme.colorScheme.onErrorContainer
+                                )
+                                Spacer(Modifier.width(6.dp))
+                                Text("O horário $hora já está ocupado.", color = MaterialTheme.colorScheme.onErrorContainer)
+                            }
                             Spacer(Modifier.height(8.dp))
                             Row {
                                 Button(onClick = { viewModel.confirmarEntradaNaFila() }) { Text("Entrar na Lista de Espera") }

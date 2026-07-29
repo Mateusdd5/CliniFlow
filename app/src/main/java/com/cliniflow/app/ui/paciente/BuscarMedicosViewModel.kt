@@ -34,10 +34,12 @@ class BuscarMedicosViewModel : ViewModel() {
                             medico.sobrenome.contains(termoBusca, ignoreCase = true))
         }
 
-    init {
+    fun iniciar(especialidadeInicial: String?) {
+        carregando = true
         viewModelScope.launch {
             medicos = usuarioRepository.listarPorTipo("medico")
-            especialidadeSelecionada = medicos.mapNotNull { it.especialidade }.distinct().sorted().firstOrNull()
+            val disponiveis = medicos.mapNotNull { it.especialidade }.distinct().sorted()
+            especialidadeSelecionada = especialidadeInicial?.takeIf { it in disponiveis } ?: disponiveis.firstOrNull()
             carregando = false
         }
     }

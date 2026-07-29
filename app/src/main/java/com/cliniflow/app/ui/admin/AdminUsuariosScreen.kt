@@ -10,6 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cliniflow.app.model.Usuario
+import com.cliniflow.app.ui.components.Avatar
+import com.cliniflow.app.ui.components.BadgeTipo
+import com.cliniflow.app.ui.components.StatusBadge
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,20 +82,22 @@ private fun UsuarioCard(usuario: Usuario, onAlternarAtivo: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(Modifier.weight(1f)) {
-                Text("${usuario.nome} ${usuario.sobrenome}", style = MaterialTheme.typography.titleMedium)
-                Text(usuario.email, style = MaterialTheme.typography.bodySmall)
-                Text(
-                    when (usuario.tipo) { "medico" -> "Médico"; "admin" -> "Admin"; else -> "Paciente" },
-                    style = MaterialTheme.typography.labelSmall
-                )
+            Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+                Avatar(nome = usuario.nome, sobrenome = usuario.sobrenome, tamanho = 44.dp)
+                Spacer(Modifier.width(10.dp))
+                Column {
+                    Text("${usuario.nome} ${usuario.sobrenome}", style = MaterialTheme.typography.titleMedium)
+                    Text(usuario.email, style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        when (usuario.tipo) { "medico" -> "Médico"; "admin" -> "Admin"; else -> "Paciente" },
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
             }
             Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    if (usuario.ativo) "Ativo" else "Inativo",
-                    color = if (usuario.ativo) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.labelMedium
-                )
+                val (texto, tipoBadge) = if (usuario.ativo) "Ativo" to BadgeTipo.SUCESSO else "Inativo" to BadgeTipo.ERRO
+                StatusBadge(texto = texto, tipo = tipoBadge)
+                Spacer(Modifier.height(6.dp))
                 TextButton(onClick = onAlternarAtivo) { Text(if (usuario.ativo) "Desativar" else "Ativar") }
             }
         }

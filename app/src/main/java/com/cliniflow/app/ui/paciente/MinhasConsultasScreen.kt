@@ -11,15 +11,27 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cliniflow.app.model.Consulta
 import com.cliniflow.app.model.ListaEspera
+import com.cliniflow.app.ui.components.BadgeTipo
+import com.cliniflow.app.ui.components.StatusBadge
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MinhasConsultasScreen(viewModel: MinhasConsultasViewModel = viewModel()) {
+fun MinhasConsultasScreen(
+    viewModel: MinhasConsultasViewModel = viewModel(),
+    onVoltar: () -> Unit
+) {
     LaunchedEffect(Unit) { viewModel.carregar() }
     var abaSelecionada by remember { mutableStateOf(0) }
     val abas = listOf("Ativas", "Histórico", "Lista de Espera")
 
-    Scaffold(topBar = { TopAppBar(title = { Text("Minhas Consultas") }) }) { padding ->
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Minhas Consultas") },
+                navigationIcon = { TextButton(onClick = onVoltar) { Text("‹ Voltar") } }
+            )
+        }
+    ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize()) {
             TabRow(selectedTabIndex = abaSelecionada) {
                 abas.forEachIndexed { index, titulo ->
@@ -56,15 +68,25 @@ private fun ListaConsultas(consultas: List<Consulta>, mostrarCancelar: Boolean, 
     LazyColumn(modifier = Modifier.padding(16.dp)) {
         items(consultas) { consulta ->
             Card(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
-                Row(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Column {
-                        Text(consulta.medicoNome, style = MaterialTheme.typography.titleMedium)
-                        Text(consulta.especialidade, style = MaterialTheme.typography.bodySmall)
-                        Text("${consulta.data} · ${consulta.hora}", style = MaterialTheme.typography.bodySmall)
-                        Text(statusLegivel(consulta.status), style = MaterialTheme.typography.labelMedium)
+                Column(Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            Text(consulta.medicoNome, style = MaterialTheme.typography.titleMedium)
+                            Text(consulta.especialidade, style = MaterialTheme.typography.bodySmall)
+                            Text("${consulta.data} · ${consulta.hora}", style = MaterialTheme.typography.bodySmall)
+                        }
+                        val (texto, tipo) = statusInfo(consulta.status)
+                        StatusBadge(texto = texto, tipo = tipo)
                     }
                     if (mostrarCancelar && (consulta.status == "pendente" || consulta.status == "confirmada")) {
-                        TextButton(onClick = { onCancelar(consulta.id) }) { Text("Cancelar") }
+                        Spacer(Modifier.height(8.dp))
+                        Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+                            TextButton(onClick = { onCancelar(consulta.id) }) { Text("Cancelar") }
+                        }
                     }
                 }
             }
@@ -81,7 +103,11 @@ private fun ListaDeEsperaTab(filas: List<ListaEspera>, onSair: (String) -> Unit)
     LazyColumn(modifier = Modifier.padding(16.dp)) {
         items(filas) { item ->
             Card(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
-                Row(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Column {
                         Text(item.medicoNome, style = MaterialTheme.typography.titleMedium)
                         Text("${item.data} · ${item.hora}", style = MaterialTheme.typography.bodySmall)
@@ -93,10 +119,10 @@ private fun ListaDeEsperaTab(filas: List<ListaEspera>, onSair: (String) -> Unit)
     }
 }
 
-private fun statusLegivel(status: String): String = when (status) {
-    "pendente" -> "Pendente"
-    "confirmada" -> "Confirmada"
-    "realizada" -> "Realizada"
-    "cancelada" -> "Cancelada"
-    else -> status
+private fun statusInfo(status: String): Pair<String, BadgeTipo> = when (status) {
+    "pendente" -> "Pendente" to BadgeTipo.ATENCAO
+    "confirmada" -> "Confirmada" to BadgeTipo.SUCESSO
+    "realizada" -> "Realizada" to BadgeTipo.INFO
+    "cancelada" -> "Cancelada" to BadgeTipo.ERRO
+    else -> status to BadgeTipo.NEUTRO
 }

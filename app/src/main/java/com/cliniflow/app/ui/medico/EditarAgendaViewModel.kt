@@ -26,6 +26,8 @@ class EditarAgendaViewModel : ViewModel() {
         private set
     var mensagem by mutableStateOf<String?>(null)
         private set
+    var salvoComSucesso by mutableStateOf(false)
+        private set
 
     fun selecionarData(data: String) {
         dataSelecionada = data
@@ -48,8 +50,8 @@ class EditarAgendaViewModel : ViewModel() {
         salvando = true
         viewModelScope.launch {
             disponibilidadeRepository.salvar(uid, dataSelecionada, horariosSelecionados.toList())
-                .onSuccess { mensagem = "Disponibilidade salva para $dataSelecionada." }
-                .onFailure { mensagem = "Erro ao salvar. Tente novamente." }
+                .onSuccess { salvoComSucesso = true; mensagem = "Disponibilidade salva para $dataSelecionada." }
+                .onFailure { salvoComSucesso = false; mensagem = "Erro ao salvar. Tente novamente." }
             salvando = false
         }
     }
